@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { 
   Terminal, 
@@ -84,9 +84,39 @@ const INITIAL_SKILLS: Skill[] = [
 
 function App() {
   const [activeTab, setActiveTab] = useState<'shop' | 'upload' | 'profile'>('shop');
-  const [skills, setSkills] = useState<Skill[]>(INITIAL_SKILLS);
+  
+  // Load skills from localStorage key stablecoincity_skills, or fallback to INITIAL_SKILLS
+  const [skills, setSkills] = useState<Skill[]>(() => {
+    try {
+      const stored = localStorage.getItem('stablecoincity_skills');
+      if (stored) {
+        const parsed = JSON.parse(stored) as Skill[];
+        return parsed.map(s => ({
+          ...s,
+          icon: s.category === 'Termux' ? <Terminal size={20} /> : s.category === 'AI' ? <Bot size={20} /> : <Zap size={20} />
+        }));
+      }
+    } catch (e) {
+      console.error("Error loading skills from localStorage", e);
+    }
+    return INITIAL_SKILLS;
+  });
+
   const [activeCategory, setActiveCategory] = useState<'All' | 'Termux' | 'AI' | 'General'>('All');
   
+  // Purchased skills state loaded from localStorage key stablecoincity_purchased
+  const [purchasedAddresses, setPurchasedAddresses] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem('stablecoincity_purchased');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Profile sub-tab selection: Mis Compras / Mis Ventas
+  const [profileSubTab, setProfileSubTab] = useState<'purchases' | 'sales'>('purchases');
+
   // Custom listing/buying contracts hook
   const { buySkill, listSkill } = useMarketplaceContract();
   const [tonConnectUI] = useTonConnectUI();
@@ -104,6 +134,36 @@ function App() {
   // Diagnostics panel state
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+
+  // Mount logic: initialize stablecoincity_files if not present
+  useEffect(() => {
+    const existingFiles = localStorage.getItem('stablecoincity_files');
+    if (!existingFiles) {
+      const mockFiles = {
+        'EQCOsAsYMFi52GBzNbkUIwJwaW5DBL489oh5DOUJ1H75PCjw': {
+          name: 'termux-web-server.sh',
+          content: `#!/bin/bash\necho "Starting Termux Web Server..."\npkg install nodejs -y\nnpm install -g http-server\nhttp-server -p 8080 -S -C cert.pem -K key.pem\n`,
+          size: 134
+        },
+        'EQDcEIR9aeOF1Op4Mi6EhNIkq1rDrkCOXdGPh-6YnTO2ClV3': {
+          name: 'autogpt-prompt.txt',
+          content: `[System Prompt]\nYou are Auto-GPT, an autonomous AI agent.\nYour goals are to browse the web, execute terminal commands, and save results.\nAlways analyze command output recursively before determining the next action.\n`,
+          size: 202
+        },
+        'EQAJGZ-Ar-cPGpYZ6jG79uca2CjpmaUEMkCRSJpvhq5uRc03': {
+          name: 'setup-ssh.sh',
+          content: `#!/bin/bash\necho "Setting up SSH in Termux..."\npkg install openssh -y\nsshd\necho "SSH Server started on port 8022. Run 'whoami' to get your user."\n`,
+          size: 147
+        },
+        'EQBqK8J0ITWsckDoRAUYTKibso52dWox_mieQL4m3EO8iu68': {
+          name: 'ai-gen.py',
+          content: `import requests\nimport json\nprint("Generating image with Stable Diffusion API...")\nresponse = requests.post("https://api.stablediffusion.local/v1/txt2img", json={"prompt": "beautiful futuristic cybercity, cyberpunk, 8k resolution"})\nwith open("output.png", "wb") as f:\n    f.write(response.content)\nprint("Image saved to output.png")\n`,
+          size: 304
+        }
+      };
+      localStorage.setItem('stablecoincity_files', JSON.stringify(mockFiles));
+    }
+  }, []);
 
   const filteredSkills = skills.filter(
     skill => activeCategory === 'All' || skill.category === activeCategory
@@ -137,15 +197,50 @@ function App() {
     }
   };
 
+  const handleDownloadScript = (skill: Skill) => {
+    try {
+      const existingFiles = localStorage.getItem('stablecoincity_files');
+      const filesObj = existingFiles ? JSON.parse(existingFiles) : {};
+      const fileData = filesObj[skill.nftAddress];
+      
+      if (!fileData) {
+        alert('❌ Archivo de script no encontrado en el almacenamiento local.');
+        return;
+      }
+
+      const blob = new Blob([fileData.content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileData.name || 'script.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(`❌ Error al descargar el script: ${err.message}`);
+    }
+  };
+
   const handleBuy = async (skill: Skill) => {
     if (!tonConnectUI.connected) {
       alert('❌ Wallet no conectada.');
       tonConnectUI.openModal();
       return;
     }
+
+    if (purchasedAddresses.includes(skill.nftAddress)) {
+      alert('❌ Este script ya ha sido comprado.');
+      return;
+    }
     
     try {
       await buySkill(skill.nftAddress, skill.price);
+      
+      const newPurchased = [...purchasedAddresses, skill.nftAddress];
+      setPurchasedAddresses(newPurchased);
+      localStorage.setItem('stablecoincity_purchased', JSON.stringify(newPurchased));
+
       alert('✅ Transacción enviada correctamente!');
     } catch (e: any) {
       alert(`❌ Error: ${e?.message || 'Error desconocido'}`);
@@ -165,6 +260,14 @@ function App() {
     }
 
     try {
+      // Read the file as text first
+      const fileContent = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => resolve(event.target?.result as string || '');
+        reader.onerror = () => reject(new Error('Error al leer el archivo.'));
+        reader.readAsText(file);
+      });
+
       setUploadState('ipfs');
       await new Promise(resolve => setTimeout(resolve, 2000));
       setUploadState('minting');
@@ -172,6 +275,20 @@ function App() {
       const newNftAddress = generateMockAddress();
       setUploadState('listing');
       await listSkill(newNftAddress, price);
+
+      // Save file data to stablecoincity_files in localStorage
+      try {
+        const existingFiles = localStorage.getItem('stablecoincity_files');
+        const filesObj = existingFiles ? JSON.parse(existingFiles) : {};
+        filesObj[newNftAddress] = {
+          name: file.name,
+          content: fileContent,
+          size: file.size
+        };
+        localStorage.setItem('stablecoincity_files', JSON.stringify(filesObj));
+      } catch (err) {
+        console.error("Error saving file to localStorage stablecoincity_files:", err);
+      }
 
       const newSkill: Skill = {
         id: Date.now(),
@@ -184,7 +301,14 @@ function App() {
         isUserListed: true
       };
 
-      setSkills(prev => [...prev, newSkill]);
+      setSkills(prev => {
+        const next = [...prev, newSkill];
+        // Strip icons before saving to localStorage to prevent circular refs/failures
+        const forStorage = next.map(({ icon, ...rest }) => rest);
+        localStorage.setItem('stablecoincity_skills', JSON.stringify(forStorage));
+        return next;
+      });
+
       setUploadState('success');
       await new Promise(resolve => setTimeout(resolve, 1500));
       setName('');
@@ -276,6 +400,27 @@ function App() {
             <Sparkles size={20} className="glow-icon" />
             <h2>Publicar Nueva Habilidad</h2>
           </div>
+          
+          <div className="economy-card">
+            <h3 className="economy-title">Economía del Marketplace</h3>
+            <div className="economy-list">
+              <div className="economy-item">
+                <div className="economy-item-main">
+                  <span className="economy-label">Fee de listado</span>
+                  <span className="economy-value">0.01 TON</span>
+                </div>
+                <p className="economy-desc">Se cobra de tu wallet al momento de listar el skill.</p>
+              </div>
+              <div className="economy-item">
+                <div className="economy-item-main">
+                  <span className="economy-label">Comisión de venta</span>
+                  <span className="economy-value">5%</span>
+                </div>
+                <p className="economy-desc">Deducido automáticamente de cada venta y enviado a la wallet del administrador.</p>
+              </div>
+            </div>
+          </div>
+
           <form onSubmit={handleUploadSubmit} className="upload-form">
             <div className="form-group">
               <label className="form-label">Nombre del Script / Skill</label>
@@ -382,26 +527,75 @@ function App() {
           </div>
 
           <div className="user-skills-section">
-            <h3>Mis Habilidades Publicadas</h3>
-            {skills.filter(s => s.isUserListed).length > 0 ? (
-              <div className="user-skills-list">
-                {skills.filter(s => s.isUserListed).map(skill => (
-                  <div key={skill.id} className="user-skill-item">
-                    <div className="user-skill-icon">{skill.icon}</div>
-                    <div className="user-skill-info">
-                      <div className="user-skill-name">{skill.name}</div>
-                      <div className="user-skill-addr">{skill.nftAddress.slice(0, 10)}...{skill.nftAddress.slice(-8)}</div>
-                    </div>
-                    <div className="user-skill-price">{skill.price} TON</div>
+            <div className="profile-sub-tabs">
+              <button 
+                type="button"
+                className={`profile-sub-tab ${profileSubTab === 'purchases' ? 'active' : ''}`}
+                onClick={() => setProfileSubTab('purchases')}
+              >
+                Mis Compras
+              </button>
+              <button 
+                type="button"
+                className={`profile-sub-tab ${profileSubTab === 'sales' ? 'active' : ''}`}
+                onClick={() => setProfileSubTab('sales')}
+              >
+                Mis Ventas
+              </button>
+            </div>
+
+            {profileSubTab === 'purchases' ? (
+              <div className="profile-tab-content">
+                {skills.filter(s => purchasedAddresses.includes(s.nftAddress)).length > 0 ? (
+                  <div className="user-skills-list">
+                    {skills.filter(s => purchasedAddresses.includes(s.nftAddress)).map(skill => (
+                      <div key={skill.id} className="user-skill-item purchase-item">
+                        <div className="user-skill-icon">{skill.icon}</div>
+                        <div className="user-skill-info">
+                          <div className="user-skill-name">{skill.name}</div>
+                          <div className="user-skill-addr">{skill.nftAddress.slice(0, 10)}...{skill.nftAddress.slice(-8)}</div>
+                        </div>
+                        <button 
+                          className="download-script-btn" 
+                          onClick={() => handleDownloadScript(skill)}
+                        >
+                          Descargar Script
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="no-skills-box">
+                    <p>Aún no has comprado ninguna habilidad.</p>
+                    <button onClick={() => setActiveTab('shop')} className="go-to-upload-btn">
+                      Ir a la Tienda <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="no-skills-box">
-                <p>No tienes habilidades publicadas en este momento.</p>
-                <button onClick={() => setActiveTab('upload')} className="go-to-upload-btn">
-                  Publicar Habilidad <ChevronRight size={16} />
-                </button>
+              <div className="profile-tab-content">
+                {skills.filter(s => s.isUserListed).length > 0 ? (
+                  <div className="user-skills-list">
+                    {skills.filter(s => s.isUserListed).map(skill => (
+                      <div key={skill.id} className="user-skill-item">
+                        <div className="user-skill-icon">{skill.icon}</div>
+                        <div className="user-skill-info">
+                          <div className="user-skill-name">{skill.name}</div>
+                          <div className="user-skill-addr">{skill.nftAddress.slice(0, 10)}...{skill.nftAddress.slice(-8)}</div>
+                        </div>
+                        <div className="user-skill-price">{skill.price} TON</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-skills-box">
+                    <p>No tienes habilidades publicadas en este momento.</p>
+                    <button onClick={() => setActiveTab('upload')} className="go-to-upload-btn">
+                      Publicar Habilidad <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
