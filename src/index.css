@@ -1,0 +1,162 @@
+:root {
+  --tg-theme-bg-color: #ffffff;
+  --tg-theme-text-color: #000000;
+  --tg-theme-button-color: #2481cc;
+  --tg-theme-button-text-color: #ffffff;
+  --tg-theme-secondary-bg-color: #efeff3;
+  --accent-color: #0088cc;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+  line-height: 1.5;
+}
+
+.app-container {
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--tg-theme-secondary-bg-color);
+  position: sticky;
+  top: 0;
+  background: var(--tg-theme-bg-color);
+  z-index: 10;
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--accent-color);
+}
+
+.hero {
+  padding: 24px 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #0088cc 0%, #00aaff 100%);
+  color: white;
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.hero p {
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.category-tabs {
+  display: flex;
+  padding: 0 16px;
+  gap: 12px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--tg-theme-secondary-bg-color);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+}
+
+.tab.active {
+  background: var(--tg-theme-button-color);
+  color: var(--tg-theme-button-text-color);
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+}
+
+.skill-card {
+  background: var(--tg-theme-bg-color);
+  border: 1px solid var(--tg-theme-secondary-bg-color);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skill-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--tg-theme-secondary-bg-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skill-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.skill-price {
+  font-weight: bold;
+  color: #2ecc71;
+  font-size: 1rem;
+}
+
+.buy-button {
+  background: var(--tg-theme-button-color);
+  color: var(--tg-theme-button-text-color);
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: 600px;
+  background: var(--tg-theme-bg-color);
+  border-top: 1px solid var(--tg-theme-secondary-bg-color);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.7rem;
+  color: #8e8e93;
+  cursor: pointer;
+}
+
+.nav-item.active {
+  color: var(--tg-theme-button-color);
+}
