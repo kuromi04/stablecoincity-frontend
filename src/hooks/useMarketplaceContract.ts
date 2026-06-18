@@ -32,7 +32,7 @@ export function useMarketplaceContract() {
                     messages: [
                         {
                             address: marketplaceAddr.toString(), // Usar friendly string (Base64) requerida por la wallet
-                            amount: toNano(priceInTon).toString(),
+                            amount: (toNano(priceInTon) + toNano('0.05')).toString(), // Agregar 0.05 TON para cubrir el fee de gas/forwarding
                             payload: payloadBoc,
                         },
                     ],

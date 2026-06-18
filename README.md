@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+# 🌌 SKILLcoin — AI Agent Skills Marketplace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Creado por [kuromi04](https://github.com/kuromi04) desde Termux (Android)**.
 
-Currently, two official plugins are available:
+SKILLcoin (stablecoinSkill) es un Marketplace descentralizado (dApp) desplegado en la blockchain de **TON (The Open Network)**. Está diseñado específicamente para permitir la compra, venta e intercambio de habilidades (scripts y configuraciones ejecutorias) de agentes de Inteligencia Artificial optimizados para ejecutarse en entornos locales y móviles como **Termux**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🎨 Características Principales
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Economía Blockchain (TON):**
+  - **Tarifa de listado:** 0.01 TON fijos por publicación para evitar spam.
+  - **Comisión de plataforma:** 5% deducido automáticamente de cada venta directa, enviado instantáneamente al contrato inteligente propietario.
+  - **Pago directo al vendedor:** 95% de la transacción más el exceso de gas sobrante (`SendRemainingValue`) se envían de forma instantánea al vendedor.
+- **Habilidades representadas como NFTs:** Cada habilidad/script cargado se acuña virtualmente y se asocia a una dirección única en la blockchain.
+- **Descargas en Perfil:** Los scripts adquiridos quedan registrados de forma inmutable y pueden descargarse directamente a través del panel de perfil para su uso inmediato en Termux.
+- **Diseño Cyber-Neon Glassmorphic:** Una interfaz visual premium ultra-moderna y adaptativa con menús estilo hamburguesa y barras de navegación optimizadas para dispositivos móviles.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Stack Tecnológico
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Contratos Inteligentes:** Tact Compiler (TON Blockchain).
+- **Frontend Framework:** React 18, Vite, TypeScript.
+- **Integración Web3:** TON Connect SDK (`@tonconnect/ui-react`, `@ton/core`).
+- **Icons:** Lucide React.
+- **Hosting:** GitHub Pages.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📥 Configuración y Ejecución Local
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Si deseas correr este proyecto de forma local en tu máquina o directamente dentro de Termux:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Requisitos Previos
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **NodeJS** v18 o superior.
+- **Yarn** o **npm**.
+
+### Pasos para Instalar y Correr
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/kuromi04/stablecoinSkill.git
+   cd stablecoinSkill/frontend
+   ```
+
+2. **Instalar dependencias:**
+   ```bash
+   yarn install
+   # o bien
+   npm install
+   ```
+
+3. **Ejecutar servidor de desarrollo:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Compilar para producción:**
+   ```bash
+   npm run build
+   ```
+
+---
+
+## 🚀 Despliegue en GitHub Pages
+
+El proyecto cuenta con integración de CI/CD mediante **GitHub Actions** para despliegue automatizado en GitHub Pages.
+
+Cada push a la rama `main` compila y despliega la dApp en:
+🔗 **[https://kuromi04.github.io/stablecoinSkill/](https://kuromi04.github.io/stablecoinSkill/)**
+
+---
+
+## 🔒 Contrato del Marketplace (Testnet)
+
+El contrato inteligente de la plataforma ha sido compilado con **Tact** y desplegado en la Testnet de TON en la dirección:
+`EQCxhChW7krycdlpFSncAD0ZH38nNABbuH_YorLdsjx6MnKm`
+
+---
+
+*Desarrollado con pasión desde un dispositivo móvil utilizando Termux, combinando el poder de la terminal de Linux con Web3.*

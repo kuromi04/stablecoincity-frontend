@@ -15,7 +15,9 @@ import {
   ExternalLink,
   ChevronRight,
   Sparkles,
-  Info
+  Info,
+  Menu,
+  X
 } from 'lucide-react';
 import { useMarketplaceContract } from './hooks/useMarketplaceContract';
 import { Address } from '@ton/core';
@@ -84,6 +86,7 @@ const INITIAL_SKILLS: Skill[] = [
 
 function App() {
   const [activeTab, setActiveTab] = useState<'shop' | 'upload' | 'profile'>('shop');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Load skills from localStorage key stablecoincity_skills, or fallback to INITIAL_SKILLS
   const [skills, setSkills] = useState<Skill[]>(() => {
@@ -352,9 +355,59 @@ function App() {
   return (
     <div className="app-container">
       <header className="header">
-        <div className="logo">StablecoinSkill<span className="logo-dot">.</span></div>
+        <div className="header-left">
+          <button className="hamburger-btn" onClick={() => setIsMenuOpen(true)}>
+            <Menu size={20} />
+          </button>
+          <div className="logo-container">
+            <img src="./logo.jpg" alt="SKILLcoin Logo" className="app-logo" />
+            <div className="logo">SKILLcoin<span className="logo-dot">.</span></div>
+          </div>
+        </div>
         <TonConnectButton />
       </header>
+
+      {isMenuOpen && (
+        <div className="side-menu-overlay" onClick={() => setIsMenuOpen(false)}>
+          <div className="side-menu" onClick={(e) => e.stopPropagation()}>
+            <div className="side-menu-header">
+              <div className="logo-container">
+                <img src="./logo.jpg" alt="SKILLcoin Logo" className="app-logo" />
+                <div className="logo">SKILLcoin<span className="logo-dot">.</span></div>
+              </div>
+              <button className="close-menu-btn" onClick={() => setIsMenuOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <nav className="side-menu-nav">
+              <button 
+                className={`side-nav-item ${activeTab === 'shop' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('shop'); setIsMenuOpen(false); }}
+              >
+                <ShoppingBag size={18} />
+                <span>Tienda</span>
+              </button>
+              <button 
+                className={`side-nav-item ${activeTab === 'upload' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('upload'); setIsMenuOpen(false); }}
+              >
+                <PlusCircle size={18} />
+                <span>Publicar Skill</span>
+              </button>
+              <button 
+                className={`side-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('profile'); setIsMenuOpen(false); }}
+              >
+                <User size={18} />
+                <span>Perfil y Compras</span>
+              </button>
+            </nav>
+            <div className="side-menu-footer">
+              <div className="creator-notice">Creado por kuromi04 desde Termux</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeTab === 'shop' && (
         <>
@@ -691,6 +744,10 @@ function App() {
           </div>
         </div>
       )}
+
+      <footer className="app-footer">
+        <p>SKILLcoin &bull; Creado por <strong>kuromi04</strong> desde <strong>Termux</strong></p>
+      </footer>
 
       <nav className="bottom-nav">
         <div className={`nav-item ${activeTab === 'shop' ? 'active' : ''}`} onClick={() => setActiveTab('shop')}><ShoppingBag size={20} /><span>Tienda</span></div>
