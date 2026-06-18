@@ -1,6 +1,10 @@
+<p align="center">
+  <img src="public/logo.jpg" alt="SKILLcoin Logo" width="160" style="border-radius: 50%;" />
+</p>
+
 # 🌌 SKILLcoin — AI Agent Skills Marketplace
 
-> **Creado por [kuromi04](https://github.com/kuromi04) desde Termux (Android)**.
+> **Desarrollado y optimizado en su totalidad por [kuromi04](https://github.com/kuromi04) desde un entorno móvil local con Termux (Android).**
 
 SKILLcoin (stablecoinSkill) es un Marketplace descentralizado (dApp) desplegado en la blockchain de **TON (The Open Network)**. Está diseñado específicamente para permitir la compra, venta e intercambio de habilidades (scripts y configuraciones ejecutorias) de agentes de Inteligencia Artificial optimizados para ejecutarse en entornos locales y móviles como **Termux**.
 
